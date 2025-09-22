@@ -474,7 +474,15 @@
                 🎌 ツーリズムEXPO2025の公式クイズアプリ
             </div>
             <button class="btn" onclick="startQuiz()">クイズを始める</button>
+            <button class="btn secondary" onclick="showCategorySelection()">カテゴリから選んで始める</button>
             <button class="btn secondary" onclick="showPage('settings')">設定</button>
+        </div>
+
+        <div id="categorySelect" class="page">
+            <h2>カテゴリを選択</h2>
+            <p style="text-align: center; margin: 20px 0; color: #666;">クイズを始めたいカテゴリを選んでください</p>
+            <div id="categoryCards" style="display: grid; gap: 15px; margin: 20px 0;"></div>
+            <button class="btn secondary" onclick="showPage('home')">ホームに戻る</button>
         </div>
 
         <div id="quiz" class="page">
@@ -648,6 +656,111 @@
             });
             quizData.fontSize = size;
             localStorage.setItem('fontSize', size);
+        }
+
+        function showCategorySelection() {
+            const categories = {};
+
+            // カテゴリごとに問題数をカウント
+            quizData.questions.forEach(q => {
+                const cat = q.category || '一般';
+                if (!categories[cat]) {
+                    categories[cat] = [];
+                }
+                categories[cat].push(q);
+            });
+
+            const categoryCards = document.getElementById('categoryCards');
+            categoryCards.innerHTML = '';
+
+            Object.keys(categories).forEach(cat => {
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    padding: 20px;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                    border-radius: 10px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    border: 2px solid transparent;
+                `;
+
+                card.innerHTML = `
+                    <h3 style="color: #667eea; margin-bottom: 10px;">${cat}</h3>
+                    <p style="color: #666; font-size: 0.9em;">問題数: ${categories[cat].length}問</p>
+                `;
+
+                card.onmouseover = () => {
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+                    card.style.borderColor = '#667eea';
+                };
+
+                card.onmouseout = () => {
+                    card.style.transform = 'none';
+                    card.style.boxShadow = 'none';
+                    card.style.borderColor = 'transparent';
+                };
+
+                card.onclick = () => startCategoryQuiz(cat);
+
+                categoryCards.appendChild(card);
+            });
+
+            // 全カテゴリオプション
+            const allCard = document.createElement('div');
+            allCard.style.cssText = `
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                color: white;
+            `;
+
+            allCard.innerHTML = `
+                <h3 style="margin-bottom: 10px;">🎲 全カテゴリ</h3>
+                <p style="font-size: 0.9em;">すべての問題からランダムに出題（${quizData.questions.length}問）</p>
+            `;
+
+            allCard.onmouseover = () => {
+                allCard.style.transform = 'translateY(-2px)';
+                allCard.style.boxShadow = '0 7px 20px rgba(102, 126, 234, 0.4)';
+            };
+
+            allCard.onmouseout = () => {
+                allCard.style.transform = 'none';
+                allCard.style.boxShadow = 'none';
+            };
+
+            allCard.onclick = () => startQuiz();
+
+            categoryCards.appendChild(allCard);
+
+            showPage('categorySelect');
+        }
+
+        function startCategoryQuiz(category) {
+            if (quizData.questions.length === 0) {
+                alert('問題が登録されていません。');
+                return;
+            }
+
+            const categoryQuestions = quizData.questions.filter(q =>
+                (q.category || '一般') === category
+            );
+
+            if (categoryQuestions.length === 0) {
+                alert('このカテゴリに問題がありません');
+                return;
+            }
+
+            const questionsToShow = Math.min(quizData.questionsToShow, categoryQuestions.length);
+            selectedQuestions = shuffleArray([...categoryQuestions]).slice(0, questionsToShow);
+            currentQuestionIndex = 0;
+            userAnswers = [];
+
+            showPage('quiz');
+            showQuestion();
         }
 
         function init() {
