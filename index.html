@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ツーリズムEXPO2025クイズ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        body.custom-bg {
+            background: none;
+        }
+
+        body.custom-bg::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .notice {
+            text-align: center;
+            color: #555;
+            padding: 10px;
+            margin-bottom: 25px;
+            font-size: 1.3em;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 20px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn.small {
+            padding: 10px 20px;
+            font-size: 0.95em;
+            margin: 5px;
+            display: inline-block;
+            width: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .question-container {
+            margin: 20px 0;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .question-counter {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .category-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e8eeff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .answer-feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            padding: 30px 60px;
+            border-radius: 20px;
+            z-index: 1000;
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+
+        .answer-feedback.correct {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 10px 40px rgba(40, 167, 69, 0.4);
+        }
+
+        .answer-feedback.incorrect {
+            background: linear-gradient(135deg, #dc3545 0%, #f86734 100%);
+            color: white;
+            box-shadow: 0 10px 40px rgba(220, 53, 69, 0.4);
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+
+        .result-card {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+        }
+
+        .result-details {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item.correct {
+            border-left-color: #28a745;
+        }
+
+        .result-item.incorrect {
+            border-left-color: #dc3545;
+        }
+
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .checkbox-item:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #764ba2;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .bg-preview {
+            width: 100%;
+            height: 150px;
+            margin: 10px 0;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            display: none;
+        }
+
+        .bg-preview.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="home" class="page active">
+            <h1 id="appTitle">🌎 ツーリズムEXPO2025クイズ</h1>
+            <div class="notice" id="subtitleArea">
+                🎌 ツーリズムEXPO2025の公式クイズアプリ
+            </div>
+            <button class="btn" onclick="startQuiz()">クイズを始める</button>
+            <button class="btn secondary" onclick="showPage('settings')">設定</button>
+        </div>
+
+        <div id="quiz" class="page">
+            <div class="question-header">
+                <span class="question-counter">
+                    問題 <span id="currentQuestion">1</span> / <span id="totalQuestionCount">5</span>
+                </span>
+                <span class="category-badge" id="categoryBadge">一般</span>
+            </div>
+            <div class="question-text" id="questionText">
+                問題文がここに表示されます
+            </div>
+            <div class="options" id="options"></div>
+            <button class="btn secondary" onclick="showPage('home')">ホームに戻る</button>
+        </div>
+
+        <div id="result" class="page">
+            <h2>クイズ結果</h2>
+            <div class="result-card">
+                <div class="score-display" id="scoreDisplay">0%</div>
+                <p><span id="correctCount">0</span> / <span id="totalCount">0</span> 問正解</p>
+            </div>
+            <div class="result-details" id="resultDetails"></div>
+            <button class="btn" onclick="resetQuiz()">もう一度チャレンジ</button>
+            <button class="btn secondary" onclick="showPage('home')">ホームに戻る</button>
+        </div>
+
+        <div id="settings" class="page">
+            <h2>設定</h2>
+
+            <div class="section">
+                <div class="section-title">アプリ設定</div>
+                <p>アプリタイトル:</p>
+                <input type="text" id="titleInput" placeholder="クイズアプリのタイトル" value="🌎 ツーリズムEXPO2025クイズ">
+                <p>サブタイトル:</p>
+                <input type="text" id="subtitleInput" placeholder="ホーム画面に表示される説明文" value="🎌 ツーリズムEXPO2025の公式クイズアプリ">
+
+                <p style="margin-top: 15px;">背景画像:</p>
+                <div class="file-input-wrapper">
+                    <input type="file" id="bgImageInput" class="file-input" accept="image/*">
+                    <label for="bgImageInput" class="file-input-label">
+                        背景画像を選択
+                    </label>
+                </div>
+                <div id="bgPreview" class="bg-preview"></div>
+                <button class="btn small secondary" onclick="removeBgImage()">背景画像を削除</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">クイズ設定</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label>総問題数: <span id="totalQuestions">0</span>問</label>
+                    <span style="margin: 0 10px;">｜</span>
+                    <label>出題数:
+                        <input type="number" id="questionsToShow" min="1" max="100" value="10" style="width: 60px; display: inline-block;">
+                    </label>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <p>出題カテゴリを選択:</p>
+                    <div id="categoryFilters" class="checkbox-group"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">CSVインポート/エクスポート</div>
+                <div class="file-input-wrapper">
+                    <input type="file" id="csvFile" class="file-input" accept=".csv">
+                    <label for="csvFile" class="file-input-label">
+                        CSVファイルを選択してインポート
+                    </label>
+                </div>
+                <button class="btn small" onclick="exportCSV()">CSVエクスポート</button>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    CSVフォーマット: カテゴリ,問題,正解,不正解1,不正解2,不正解3
+                </p>
+            </div>
+
+            <div class="section">
+                <div class="section-title">問題を手動で追加</div>
+                <input type="text" class="question-input" id="newCategory" placeholder="カテゴリ（省略可）">
+                <input type="text" class="question-input" id="newQuestion" placeholder="問題文">
+                <input type="text" class="question-input" id="newCorrect" placeholder="正解">
+                <input type="text" class="question-input" id="newIncorrect1" placeholder="不正解1">
+                <input type="text" class="question-input" id="newIncorrect2" placeholder="不正解2（省略可）">
+                <input type="text" class="question-input" id="newIncorrect3" placeholder="不正解3（省略可）">
+                <button class="btn small" onclick="addQuestion()">問題を追加</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">問題一覧</div>
+                <div style="margin-bottom: 15px;">
+                    <button class="btn small secondary" onclick="selectAllQuestions()">すべて選択</button>
+                    <button class="btn small secondary" onclick="deselectAllQuestions()">選択解除</button>
+                    <button class="btn small" onclick="deleteSelectedQuestions()" style="background: #dc3545;">選択した問題を削除</button>
+                    <button class="btn small" onclick="deleteAllQuestions()" style="background: #dc3545;">すべて削除</button>
+                </div>
+                <div id="questionList"></div>
+            </div>
+
+            <button class="btn" onclick="saveSettings()">設定を保存</button>
+            <button class="btn secondary" onclick="showPage('home')">ホームに戻る</button>
+        </div>
+    </div>
+
+    <script>
+        // 初期データを設定
+        let quizData = {
+            questions: [
+                {"category":"AIマサル","question":"AIマサルくん®は話しかけるとどうなる？","options":["答えてくれる","寝てしまう"],"correct":0,"optionCount":2},
+                {"category":"AIマサル","question":"AIマサルの「AI」とは？","options":["人工知能（Artificial Intelligence）","愛（LOVE）"],"correct":0,"optionCount":2},
+                {"category":"デジタルマップ","question":"TOBUデジタルマップは何をするサービス？","options":["地図のように観光情報をまとめる","ハンバーグのレシピを教える"],"correct":0,"optionCount":2},
+                {"category":"デジタルマップ","question":"TOBUデジタルマップは誰の役に立つ？","options":["観光客や地域の人","宇宙人"],"correct":0,"optionCount":2},
+                {"category":"こんにちハロー","question":"「こんにちハロー」はどんなサービス？","options":["動画を他言語に翻訳するサービス","ペットと会話できるサービス"],"correct":0,"optionCount":2},
+                {"category":"こんにちハロー","question":"「こんにちハロー」の翻訳動画の特徴は？","options":["声や口の動きも自然に再現される","声がアニメ声になる"],"correct":0,"optionCount":2},
+                {"category":"NFT","question":"NFTを持っていると何ができる？","options":["デジタルアイテムの所有権を証明できる","空を飛べる"],"correct":0,"optionCount":2},
+                {"category":"NFT","question":"NFTは何の略？","options":["Non-Fungible Token（非代替性トークン）","New Fun Toy（新しいおもちゃ）"],"correct":0,"optionCount":2},
+                {"category":"脱炭素","question":"脱炭素とは？","options":["二酸化炭素（CO₂）を減らす取り組み","二酸化炭素（CO₂）を増やす取り組み"],"correct":0,"optionCount":2},
+                {"category":"脱炭素","question":"脱炭素に向けた取り組みの例は？","options":["節電や自転車通勤をする","暖房をフル稼働にする"],"correct":0,"optionCount":2},
+                {"category":"デジタク","question":"デジタクはどうやって利用する？","options":["スマートフォンで利用できる","紙のチケットを毎回コンビニで交換する"],"correct":0,"optionCount":2},
+                {"category":"デジタク","question":"デジタクの特徴は？","options":["どなたでも直感的に操作できるシンプルなデザイン","利用操作が煩雑で難しい"],"correct":0,"optionCount":2},
+                {"category":"ふるまちpay","question":"ふるまちPayとは？","options":["現地決済型のふるさと納税サービス","ゲームのポイントカード"],"correct":0,"optionCount":2},
+                {"category":"ふるまちpay","question":"ふるまちPayのメリットは？","options":["納税しながら地域を応援できる","納税すると空を飛べる"],"correct":0,"optionCount":2},
+                {"category":"神田明神","question":"株式会社CoCoRoが運営する神田明神文化交流館「EDOCCO STUDIO」とはどのような施設？","options":["日本の伝統文化からサブカルチャーまで、幅広く体験できる文化交流施設","最新のテクノロジーを駆使したゲームセンター"],"correct":0,"optionCount":2},
+                {"category":"神田明神","question":"神田明神で有名なのは？","options":["商売繁盛や学業成就のご利益","宝くじが必ず当たる"],"correct":0,"optionCount":2},
+                {"category":"スカイツリータウン","question":"スカイツリータウンのシンボルは？","options":["東京スカイツリー","東京タワー"],"correct":0,"optionCount":2},
+                {"category":"スカイツリータウン","question":"スカイツリータウンはどこにある？","options":["東京","大阪"],"correct":0,"optionCount":2},
+                {"category":"観光コンテンツ開発","question":"観光コンテンツ開発は何のため？","options":["観光地を盛り上げ、地域経済や交流を活性化する","観光地でひたすらお昼寝する"],"correct":0,"optionCount":2},
+                {"category":"観光コンテンツ開発","question":"東武トップツアーズが観光コンテンツを作るときに重視していることは？","options":["地域の魅力やストーリーを活かすこと","とにかく派手なイルミネーション"],"correct":0,"optionCount":2}
+            ],
+            questionsToShow: 10,
+            selectedCategories: [],
+            appTitle: '🌎 ツーリズムEXPO2025クイズ',
+            subtitle: '🎌 ツーリズムEXPO2025の公式クイズアプリ',
+            bgImage: null
+        };
+
+        let currentQuestionIndex = 0;
+        let selectedQuestions = [];
+        let userAnswers = [];
+
+        function init() {
+            loadData();
+            updateUI();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('csvFile').addEventListener('change', importCSV);
+            document.getElementById('bgImageInput').addEventListener('change', handleBgImageUpload);
+            document.getElementById('questionsToShow').addEventListener('change', function() {
+                quizData.questionsToShow = Math.max(1, parseInt(this.value) || 10);
+            });
+            document.getElementById('titleInput').addEventListener('input', function() {
+                quizData.appTitle = this.value || '🌎 ツーリズムEXPO2025クイズ';
+                document.getElementById('appTitle').textContent = quizData.appTitle;
+            });
+            document.getElementById('subtitleInput').addEventListener('input', function() {
+                quizData.subtitle = this.value || '🎌 ツーリズムEXPO2025の公式クイズアプリ';
+                document.getElementById('subtitleArea').textContent = quizData.subtitle;
+            });
+        }
+
+        function handleBgImageUpload(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    quizData.bgImage = event.target.result;
+                    applyBgImage();
+                    updateBgPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function applyBgImage() {
+            if (quizData.bgImage) {
+                document.body.classList.add('custom-bg');
+                document.body.style.backgroundImage = `url("${quizData.bgImage}")`;
+            } else {
+                document.body.classList.remove('custom-bg');
+                document.body.style.backgroundImage = '';
+            }
+        }
+
+        function updateBgPreview() {
+            const preview = document.getElementById('bgPreview');
+            if (quizData.bgImage) {
+                preview.style.backgroundImage = `url("${quizData.bgImage}")`;
+                preview.classList.add('active');
+            } else {
+                preview.style.backgroundImage = '';
+                preview.classList.remove('active');
+            }
+        }
+
+        function removeBgImage() {
+            quizData.bgImage = null;
+            applyBgImage();
+            updateBgPreview();
+            document.getElementById('bgImageInput').value = '';
+        }
+
+        function importCSV(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const text = event.target.result;
+                const lines = text.split('\n');
+                const importedQuestions = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    if (i === 0 && line.includes('Ｑ')) continue;
+
+                    const cells = parseCSVLine(line);
+
+                    if (cells.length >= 4) {
+                        const category = (cells[0] || '').trim();
+                        const question = cells[1] ? cells[1].trim() : '';
+                        const correctAnswer = cells[2] ? cells[2].trim() : '';
+                        const incorrectAnswers = cells.slice(3)
+                            .map(cell => (cell || '').trim())
+                            .filter(cell => cell !== '');
+
+                        if (question && correctAnswer && incorrectAnswers.length >= 1) {
+                            const allOptions = [correctAnswer, ...incorrectAnswers];
+
+                            importedQuestions.push({
+                                category: category || '一般',
+                                question: question,
+                                options: allOptions,
+                                correct: 0,
+                                optionCount: allOptions.length
+                            });
+                        }
+                    }
+                }
+
+                if (importedQuestions.length > 0) {
+                    quizData.questions = quizData.questions.concat(importedQuestions);
+                    saveData();
+                    updateUI();
+                    alert(`${importedQuestions.length}問の問題をインポートしました`);
+                } else {
+                    alert('有効な問題が見つかりませんでした');
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function parseCSVLine(line) {
+            const cells = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    cells.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            cells.push(current);
+
+            return cells;
+        }
+
+        function exportCSV() {
+            let csvContent = 'カテゴリ,問題,正解,不正解1,不正解2,不正解3\n';
+
+            quizData.questions.forEach(q => {
+                const category = q.category || '';
+                const question = q.question;
+                const correctAnswer = q.options[q.correct];
+                const incorrectAnswers = q.options.filter((opt, index) => index !== q.correct);
+
+                const cells = [category, question, correctAnswer, ...incorrectAnswers]
+                    .map(value => `"${(value || '').replace(/"/g, '""')}"`);
+
+                csvContent += cells.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'quiz_data.csv';
+            link.click();
+        }
+
+        function addQuestion() {
+            const category = document.getElementById('newCategory').value.trim();
+            const question = document.getElementById('newQuestion').value.trim();
+            const correct = document.getElementById('newCorrect').value.trim();
+            const incorrect1 = document.getElementById('newIncorrect1').value.trim();
+            const incorrect2 = document.getElementById('newIncorrect2').value.trim();
+            const incorrect3 = document.getElementById('newIncorrect3').value.trim();
+
+            if (!question || !correct || !incorrect1) {
+                alert('問題文、正解、不正解1は必須です');
+                return;
+            }
+
+            const options = [correct];
+            if (incorrect1) options.push(incorrect1);
+            if (incorrect2) options.push(incorrect2);
+            if (incorrect3) options.push(incorrect3);
+
+            quizData.questions.push({
+                category: category || '一般',
+                question: question,
+                options: options,
+                correct: 0,
+                optionCount: options.length
+            });
+
+            document.getElementById('newCategory').value = '';
+            document.getElementById('newQuestion').value = '';
+            document.getElementById('newCorrect').value = '';
+            document.getElementById('newIncorrect1').value = '';
+            document.getElementById('newIncorrect2').value = '';
+            document.getElementById('newIncorrect3').value = '';
+
+            saveData();
+            updateUI();
+            alert('問題を追加しました');
+        }
+
+        function deleteQuestion(index) {
+            if (confirm('この問題を削除しますか？')) {
+                quizData.questions.splice(index, 1);
+                saveData();
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('appTitle').textContent = quizData.appTitle;
+            document.getElementById('subtitleArea').textContent = quizData.subtitle;
+            document.getElementById('titleInput').value = quizData.appTitle;
+            document.getElementById('subtitleInput').value = quizData.subtitle;
+
+            applyBgImage();
+            updateBgPreview();
+
+            document.getElementById('totalQuestions').textContent = quizData.questions.length;
+            document.getElementById('questionsToShow').value = quizData.questionsToShow;
+
+            const categories = [...new Set(quizData.questions.map(q => q.category || '一般'))];
+            const categoryFilters = document.getElementById('categoryFilters');
+            categoryFilters.innerHTML = '';
+
+            categories.forEach(cat => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-item';
+                label.innerHTML = `
+                    <input type="checkbox" value="${cat}" checked>
+                    <span>${cat}</span>
+                `;
+                categoryFilters.appendChild(label);
+            });
+
+            const questionList = document.getElementById('questionList');
+            questionList.innerHTML = '';
+            quizData.questions.forEach((q, index) => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.style.position = 'relative';
+                div.innerHTML = `
+                    <input type="checkbox" class="question-checkbox" data-index="${index}" style="position: absolute; top: 15px; right: 15px;">
+                    <strong>${index + 1}. [${q.category || '一般'}] ${q.question}</strong><br>
+                    正解: ${q.options[q.correct]}<br>
+                    <button class="btn small secondary" onclick="deleteQuestion(${index})">削除</button>
+                `;
+                questionList.appendChild(div);
+            });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function startQuiz() {
+            if (quizData.questions.length === 0) {
+                alert('問題が登録されていません。設定から問題を追加してください。');
+                return;
+            }
+
+            const selectedCategories = Array.from(document.querySelectorAll('#categoryFilters input:checked'))
+                .map(input => input.value);
+
+            if (selectedCategories.length === 0) {
+                alert('少なくとも1つのカテゴリを選択してください');
+                return;
+            }
+
+            const filteredQuestions = quizData.questions.filter(q =>
+                selectedCategories.includes(q.category || '一般')
+            );
+
+            if (filteredQuestions.length === 0) {
+                alert('選択したカテゴリに問題がありません');
+                return;
+            }
+
+            const questionsToShow = Math.min(quizData.questionsToShow, filteredQuestions.length);
+            selectedQuestions = shuffleArray([...filteredQuestions]).slice(0, questionsToShow);
+            currentQuestionIndex = 0;
+            userAnswers = [];
+
+            showPage('quiz');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestionCount').textContent = selectedQuestions.length;
+            document.getElementById('categoryBadge').textContent = question.category || '一般';
+            document.getElementById('questionText').textContent = question.question;
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = shuffleArray([...question.options]);
+            const correctIndex = shuffledOptions.indexOf(question.options[question.correct]);
+
+            shuffledOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index, correctIndex);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex, correctIndex) {
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                option.classList.add('disabled');
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            const isCorrect = selectedIndex === correctIndex;
+
+            // フィードバックを表示
+            showAnswerFeedback(isCorrect);
+
+            userAnswers.push({
+                question: selectedQuestions[currentQuestionIndex],
+                userAnswer: selectedIndex,
+                correctAnswer: correctIndex,
+                isCorrect: isCorrect
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < selectedQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1500);
+        }
+
+        function showAnswerFeedback(isCorrect) {
+            // 既存のフィードバックを削除
+            const existingFeedback = document.querySelector('.answer-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            // 新しいフィードバックを作成
+            const feedback = document.createElement('div');
+            feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.textContent = isCorrect ? '正解！' : '不正解...';
+            document.body.appendChild(feedback);
+
+            // アニメーション終了後に削除
+            setTimeout(() => {
+                feedback.remove();
+            }, 1500);
+        }
+
+        function showResult() {
+            const correctCount = userAnswers.filter(a => a.isCorrect).length;
+            const totalCount = userAnswers.length;
+            const percentage = Math.round((correctCount / totalCount) * 100);
+
+            document.getElementById('scoreDisplay').textContent = `${percentage}%`;
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('totalCount').textContent = totalCount;
+
+            const detailsContainer = document.getElementById('resultDetails');
+            detailsContainer.innerHTML = '<h3>詳細結果</h3>';
+
+            userAnswers.forEach((answer, index) => {
+                const div = document.createElement('div');
+                div.className = `result-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
+                div.innerHTML = `
+                    <strong>問${index + 1}: ${answer.question.question}</strong><br>
+                    正解: ${answer.question.options[answer.question.correct]}<br>
+                    ${answer.isCorrect ? '✓ 正解' : '✗ 不正解'}
+                `;
+                detailsContainer.appendChild(div);
+            });
+
+            showPage('result');
+        }
+
+        function resetQuiz() {
+            startQuiz();
+        }
+
+        function saveSettings() {
+            saveData();
+            alert('設定を保存しました');
+            showPage('home');
+        }
+
+        function saveData() {
+            localStorage.setItem('tourismQuizData', JSON.stringify(quizData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('tourismQuizData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                quizData = { ...quizData, ...parsed };
+            }
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function selectAllQuestions() {
+            document.querySelectorAll('.question-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+
+        function deselectAllQuestions() {
+            document.querySelectorAll('.question-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+
+        function deleteSelectedQuestions() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('削除する問題を選択してください');
+                return;
+            }
+
+            if (confirm(`${checkboxes.length}個の問題を削除しますか？`)) {
+                const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index)).sort((a, b) => b - a);
+                indices.forEach(index => {
+                    quizData.questions.splice(index, 1);
+                });
+                saveData();
+                updateUI();
+                alert(`${checkboxes.length}個の問題を削除しました`);
+            }
+        }
+
+        function deleteAllQuestions() {
+            if (quizData.questions.length === 0) {
+                alert('削除する問題がありません');
+                return;
+            }
+
+            if (confirm('すべての問題を削除しますか？この操作は取り消せません。')) {
+                if (confirm('本当にすべての問題を削除してもよろしいですか？')) {
+                    quizData.questions = [];
+                    saveData();
+                    updateUI();
+                    alert('すべての問題を削除しました');
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
